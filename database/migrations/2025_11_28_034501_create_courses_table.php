@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->string('name');
-            $table->integer('sks');
             $table->integer('semester');
             $table->boolean('is_lab')->default(false);
             $table->timestamps();

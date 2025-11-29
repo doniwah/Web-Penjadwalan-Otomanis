@@ -16,7 +16,8 @@ class AdminController extends Controller
         $studentsCount = Student::count();
         $coursesCount = Course::count();
         $roomsCount = Room::count();
+        $assignmentsCount = \App\Models\TeachingAssignment::count();
 
-        return view('admin.dashboard', compact('lecturersCount', 'studentsCount', 'coursesCount', 'roomsCount'));
+        return view('admin.dashboard', compact('lecturersCount', 'studentsCount', 'coursesCount', 'roomsCount', 'assignmentsCount'));
     }
 }

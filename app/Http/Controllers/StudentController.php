@@ -9,9 +9,28 @@ class StudentController extends Controller
 {
     public function index()
     {
-        // Ideally filter by student's enrolled courses. 
-        // For now, showing all schedules.
+        // Student Dashboard
+        return view('student.dashboard');
+    }
+
+    public function schedule()
+    {
+        // View student's schedule
+        // TODO: Filter by student's enrolled courses
         $schedules = Schedule::with(['course', 'lecturer', 'room', 'timeslot'])->get();
-        return view('student.dashboard', compact('schedules'));
+        return view('student.schedule', compact('schedules'));
+    }
+
+    public function replacementSchedule()
+    {
+        // View replacement schedules
+        // TODO: Implement replacement schedule logic
+        return view('student.replacement-schedule');
+    }
+
+    public function notifications()
+    {
+        // Notification settings
+        return view('student.notifications');
     }
 }

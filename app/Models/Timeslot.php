@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Timeslot extends Model
 {
-    protected $fillable = ['day', 'start_time', 'end_time'];
+    protected $fillable = ['day', 'session', 'start_time', 'end_time'];
 
     public function schedules()
     {

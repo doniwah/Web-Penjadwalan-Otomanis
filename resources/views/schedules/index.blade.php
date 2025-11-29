@@ -30,14 +30,21 @@
                                     });
                                 @endphp
 
-                                <div class="min-h-[100px] p-2 rounded {{ $class ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50' }}">
+                                <div class="min-h-[100px] p-2 rounded-lg transition duration-300 {{ $class ? 'bg-blue-50 border border-blue-200 hover:shadow-md hover:bg-blue-100' : 'bg-gray-50' }}">
                                     @if($class)
                                         <div class="font-bold text-sm text-dark">{{ $class->course->name }}</div>
-                                        <div class="text-xs text-gray-600">{{ $class->course->code }} - {{ $class->class_name }}</div>
-                                        <div class="text-xs text-accent mt-1">{{ $class->lecturer->user->name }}</div>
-                                        <div class="text-xs text-gray-500 mt-1 bg-white inline-block px-1 rounded border">{{ $class->room->name }}</div>
+                                        <div class="text-xs text-gray-600 mb-1">{{ $class->course->code }} - {{ $class->class_name }}</div>
+                                        <div class="flex items-center text-xs text-accent mt-1">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                            {{ $class->lecturer->user->name }}
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1 bg-white inline-block px-2 py-0.5 rounded border border-gray-200 shadow-sm">
+                                            {{ $class->room->name }}
+                                        </div>
                                     @else
-                                        <div class="text-center text-gray-300 text-xs">-</div>
+                                        <div class="h-full flex items-center justify-center">
+                                            <span class="text-gray-300 text-xs">-</span>
+                                        </div>
                                     @endif
                                 </div>
                             @endforeach

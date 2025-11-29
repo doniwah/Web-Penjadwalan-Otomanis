@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('timeslots', function (Blueprint $table) {
             $table->id();
             $table->enum('day', ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
+            $table->integer('session')->comment('Session number: 1, 2, 3, etc.');
             $table->time('start_time');
             $table->time('end_time');
             $table->timestamps();

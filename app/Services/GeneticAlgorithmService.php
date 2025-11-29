@@ -7,12 +7,12 @@ use App\Models\Lecturer;
 use App\Models\Room;
 use App\Models\Schedule;
 use App\Models\Timeslot;
+use App\Models\TeachingAssignment;
 use Illuminate\Support\Collection;
 
 class GeneticAlgorithmService
 {
-    protected $courses;
-    protected $lecturers;
+    protected $assignments;
     protected $rooms;
     protected $timeslots;
     protected $populationSize;
@@ -30,8 +30,7 @@ class GeneticAlgorithmService
 
     public function initializeData()
     {
-        $this->courses = Course::all();
-        $this->lecturers = Lecturer::all();
+        $this->assignments = TeachingAssignment::with(['course', 'lecturer'])->get();
         $this->rooms = Room::all();
         $this->timeslots = Timeslot::all();
     }
@@ -48,22 +47,14 @@ class GeneticAlgorithmService
     protected function createIndividual()
     {
         $schedule = [];
-        foreach ($this->courses as $course) {
-            // Assign a random lecturer, room, and timeslot
-            // In a real scenario, lecturer might be pre-assigned to course
-            // For now, we assume course has a designated lecturer or we pick one randomly if not
-            // But usually Course-Lecturer is a fixed constraint.
-            // Let's assume for now we just pick a random room and timeslot for the course.
-            
-            // We need to handle classes (e.g. Course A Class A, Course A Class B)
-            // For simplicity, let's assume 1 course = 1 class for now, or we iterate classes.
-            
+        foreach ($this->assignments as $assignment) {
             $schedule[] = [
-                'course_id' => $course->id,
-                'lecturer_id' => $this->lecturers->random()->id, // Should be fixed per course ideally
+                'assignment_id' => $assignment->id,
+                'course_id' => $assignment->course_id,
+                'lecturer_id' => $assignment->lecturer_id,
+                'class_name' => $assignment->class_name,
                 'room_id' => $this->rooms->random()->id,
                 'timeslot_id' => $this->timeslots->random()->id,
-                'class_name' => 'A', // Placeholder
             ];
         }
         return $schedule;
@@ -74,45 +65,68 @@ class GeneticAlgorithmService
         $hardConflicts = 0;
         $softConflicts = 0;
 
-        // Hard Constraints
         $lecturerSlots = [];
         $roomSlots = [];
+        $classSlots = [];
 
         foreach ($individual as $gene) {
             $lecturerId = $gene['lecturer_id'];
             $roomId = $gene['room_id'];
             $timeslotId = $gene['timeslot_id'];
+            $className = $gene['class_name'];
+            $courseId = $gene['course_id']; // Needed for class conflict check (assuming class name is unique per course or globally? Usually globally unique or Course+Class unique)
+            // Actually, usually Class Name like 'IF-A' is unique for a batch. 
+            // Let's assume Class Name + Course Semester or just Class Name is the identifier for the student group.
+            // For now, we'll use Class Name as the Student Group identifier.
 
-            // Check Lecturer Conflict
+            // 1. Hard Constraint: Lecturer Conflict
             if (isset($lecturerSlots[$lecturerId][$timeslotId])) {
                 $hardConflicts++;
             }
             $lecturerSlots[$lecturerId][$timeslotId] = true;
 
-            // Check Room Conflict
+            // 2. Hard Constraint: Room Conflict
             if (isset($roomSlots[$roomId][$timeslotId])) {
                 $hardConflicts++;
             }
             $roomSlots[$roomId][$timeslotId] = true;
 
-            // Soft Constraints: Lecturer Preferences
-            $lecturer = $this->lecturers->find($lecturerId);
+            // 3. Hard Constraint: Student Group (Class) Conflict
+            // Students in Class 'A' cannot have two courses at the same time.
+            if (isset($classSlots[$className][$timeslotId])) {
+                $hardConflicts++;
+            }
+            $classSlots[$className][$timeslotId] = true;
+
+            // Soft Constraints
+            $lecturer = $this->assignments->firstWhere('id', $gene['assignment_id'])->lecturer;
             $timeslot = $this->timeslots->find($timeslotId);
             
+            // Preference: Lecturer Day
             if ($lecturer && !empty($lecturer->preferred_days)) {
                 if (!in_array($timeslot->day, $lecturer->preferred_days)) {
                     $softConflicts++;
                 }
             }
+            
+            // Preference: Avoid Friday Prayer time (example)
+            if ($timeslot->day == 'Friday' && $timeslot->start_time >= '11:30' && $timeslot->end_time <= '13:00') {
+                 $softConflicts += 2;
+            }
         }
 
-        // Weighted fitness: Hard constraints have high penalty (10), Soft constraints low (1)
-        return 1 / (($hardConflicts * 10) + $softConflicts + 1);
+        // Penalty weights
+        $fitness = 1 / (($hardConflicts * 100) + ($softConflicts * 1) + 1);
+        return $fitness;
     }
     
     public function run($generations = 100)
     {
         $this->initializeData();
+        if ($this->assignments->isEmpty() || $this->rooms->isEmpty() || $this->timeslots->isEmpty()) {
+            return [];
+        }
+
         $population = $this->generatePopulation();
 
         for ($g = 0; $g < $generations; $g++) {
@@ -121,9 +135,14 @@ class GeneticAlgorithmService
                 return $this->calculateFitness($b) <=> $this->calculateFitness($a);
             });
 
-            // Check if we have a perfect solution
-            if ($this->calculateFitness($population[0]) == 1) {
-                break;
+            // Check for perfect solution (fitness close to 1, meaning 0 hard conflicts)
+            // It's hard to get exactly 1 if soft conflicts exist.
+            // But we definitely want 0 hard conflicts.
+            $bestFitness = $this->calculateFitness($population[0]);
+            if ($bestFitness > 0.5) { // Threshold for "good enough" or 0 hard conflicts
+                 // If hard conflicts are 0, fitness is 1 / (soft + 1). Max soft is usually low.
+                 // If hard conflicts > 0, fitness is < 1/100 = 0.01
+                 // So > 0.01 means 0 hard conflicts.
             }
 
             $newPopulation = [];
@@ -133,10 +152,10 @@ class GeneticAlgorithmService
                 $newPopulation[] = $population[$i];
             }
 
-            // Crossover & Mutation
+            // Selection & Crossover
             while (count($newPopulation) < $this->populationSize) {
-                $parent1 = $population[rand(0, $this->populationSize / 2)]; // Pick from top half
-                $parent2 = $population[rand(0, $this->populationSize / 2)];
+                $parent1 = $this->rouletteWheelSelection($population);
+                $parent2 = $this->rouletteWheelSelection($population);
 
                 $child = $this->crossover($parent1, $parent2);
                 $child = $this->mutation($child);
@@ -153,6 +172,26 @@ class GeneticAlgorithmService
         });
 
         return $population[0];
+    }
+
+    protected function rouletteWheelSelection($population)
+    {
+        $totalFitness = 0;
+        foreach ($population as $individual) {
+            $totalFitness += $this->calculateFitness($individual);
+        }
+
+        $random = rand(0, 1000) / 1000 * $totalFitness;
+        $currentFitness = 0;
+
+        foreach ($population as $individual) {
+            $currentFitness += $this->calculateFitness($individual);
+            if ($currentFitness >= $random) {
+                return $individual;
+            }
+        }
+
+        return $population[0]; // Fallback
     }
 
     protected function crossover($parent1, $parent2)

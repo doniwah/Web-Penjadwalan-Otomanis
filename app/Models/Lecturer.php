@@ -21,5 +21,10 @@ class Lecturer extends Model
     {
         return $this->hasMany(Schedule::class);
     }
+
+    public function teachingAssignments()
+    {
+        return $this->hasMany(TeachingAssignment::class);
+    }
     //
 }

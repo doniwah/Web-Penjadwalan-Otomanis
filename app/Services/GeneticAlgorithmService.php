@@ -51,7 +51,8 @@ class GeneticAlgorithmService
             $schedule[] = [
                 'assignment_id' => $assignment->id,
                 'course_id' => $assignment->course_id,
-                'lecturer_id' => $assignment->lecturer_id,
+                'lecturer_id_1' => $assignment->lecturer_id_1,
+                'lecturer_id_2' => $assignment->lecturer_id_2,
                 'class_name' => $assignment->class_name,
                 'room_id' => $this->rooms->random()->id,
                 'timeslot_id' => $this->timeslots->random()->id,
@@ -70,20 +71,25 @@ class GeneticAlgorithmService
         $classSlots = [];
 
         foreach ($individual as $gene) {
-            $lecturerId = $gene['lecturer_id'];
+            $lecturerId1 = $gene['lecturer_id_1'];
+            $lecturerId2 = $gene['lecturer_id_2'] ?? null;
             $roomId = $gene['room_id'];
             $timeslotId = $gene['timeslot_id'];
             $className = $gene['class_name'];
-            $courseId = $gene['course_id']; // Needed for class conflict check (assuming class name is unique per course or globally? Usually globally unique or Course+Class unique)
-            // Actually, usually Class Name like 'IF-A' is unique for a batch. 
-            // Let's assume Class Name + Course Semester or just Class Name is the identifier for the student group.
-            // For now, we'll use Class Name as the Student Group identifier.
 
-            // 1. Hard Constraint: Lecturer Conflict
-            if (isset($lecturerSlots[$lecturerId][$timeslotId])) {
+            // 1. Hard Constraint: Lecturer Conflict (for both lecturers)
+            if (isset($lecturerSlots[$lecturerId1][$timeslotId])) {
                 $hardConflicts++;
             }
-            $lecturerSlots[$lecturerId][$timeslotId] = true;
+            $lecturerSlots[$lecturerId1][$timeslotId] = true;
+            
+            // Check second lecturer if exists
+            if ($lecturerId2) {
+                if (isset($lecturerSlots[$lecturerId2][$timeslotId])) {
+                    $hardConflicts++;
+                }
+                $lecturerSlots[$lecturerId2][$timeslotId] = true;
+            }
 
             // 2. Hard Constraint: Room Conflict
             if (isset($roomSlots[$roomId][$timeslotId])) {

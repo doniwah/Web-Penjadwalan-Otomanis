@@ -15,7 +15,7 @@ class DashboardController extends Controller
             case 'admin':
                 return redirect()->route('admin.dashboard');
             case 'dosen':
-                return redirect()->route('lecturer.dashboard');
+                return redirect()->route('dosen.dashboard');
             case 'mahasiswa':
                 return redirect()->route('student.dashboard');
             default:

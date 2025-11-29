@@ -34,6 +34,15 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
+        // Update student data if user is a student
+        if ($request->user()->role === 'mahasiswa' && $request->user()->student) {
+            $request->user()->student->update([
+                'class_name' => $request->input('class_name'),
+                'prodi' => $request->input('prodi'),
+                'semester' => $request->input('semester'),
+            ]);
+        }
+
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 

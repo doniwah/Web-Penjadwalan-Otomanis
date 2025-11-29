@@ -1,40 +1,21 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard Mahasiswa') }}
+            {{ __('Dashboard Dosen') }}
         </h2>
     </x-slot>
 
     <div class="py-12 animate-fade-in">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Welcome Card -->
-            <div class="modern-card mb-6 bg-gradient-to-r from-green-500 to-green-600 text-white">
+            <div class="modern-card mb-6 bg-gradient-to-r from-purple-500 to-purple-600 text-white">
                 <div class="p-6">
                     <h3 class="text-2xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}! 👋</h3>
-                    @if($student && $student->class_name)
-                        <p class="text-green-100">{{ $student->prodi }} - Kelas {{ $student->class_name }} - Semester {{ $student->semester }}</p>
-                    @else
-                        <p class="text-green-100">Silakan lengkapi profil Anda untuk melihat jadwal</p>
+                    @if($lecturer)
+                        <p class="text-purple-100">NIP: {{ $lecturer->nip }}</p>
                     @endif
                 </div>
             </div>
-
-            @if(!$student || !$student->class_name || !$student->prodi || !$student->semester)
-                <!-- Alert to complete profile -->
-                <div class="modern-card mb-6 bg-yellow-50 border-l-4 border-yellow-500">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <svg class="w-6 h-6 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                            <div>
-                                <p class="font-semibold text-yellow-800">Profil Belum Lengkap</p>
-                                <p class="text-sm text-yellow-700">Silakan lengkapi data kelas, prodi, dan semester Anda di menu Profile untuk melihat jadwal kuliah.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
 
             <!-- Quick Stats -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -63,8 +44,8 @@
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm text-gray-600">Total Mata Kuliah</p>
-                                <p class="text-2xl font-bold text-gray-900">{{ $totalCourses }}</p>
+                                <p class="text-sm text-gray-600">Total Kelas Mengajar</p>
+                                <p class="text-2xl font-bold text-gray-900">-</p>
                             </div>
                         </div>
                     </div>
@@ -91,19 +72,20 @@
             @if($todaySchedules->count() > 0)
                 <div class="modern-card mb-6">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📅 Jadwal Hari Ini - {{ now()->format('l, d F Y') }}</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📅 Jadwal Mengajar Hari Ini - {{ now()->format('l, d F Y') }}</h3>
                         <div class="space-y-3">
                             @foreach($todaySchedules as $schedule)
-                                <div class="p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
+                                <div class="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
                                     <div class="flex items-start justify-between">
                                         <div class="flex-1">
                                             <h4 class="font-semibold text-gray-900 text-lg">{{ $schedule->course->name }}</h4>
                                             <p class="text-sm text-gray-600 mt-1">
                                                 <span class="font-mono">{{ $schedule->course->code }}</span>
+                                                <span class="ml-2 badge bg-blue-100 text-blue-800">Kelas {{ $schedule->class_name }}</span>
                                                 @if($schedule->course->is_lab)
                                                     <span class="ml-2 badge bg-orange-100 text-orange-800">Lab</span>
                                                 @else
-                                                    <span class="ml-2 badge bg-blue-100 text-blue-800">Teori</span>
+                                                    <span class="ml-2 badge bg-green-100 text-green-800">Teori</span>
                                                 @endif
                                             </p>
                                             <div class="mt-2 flex flex-wrap gap-3 text-sm text-gray-700">
@@ -119,15 +101,6 @@
                                                     </svg>
                                                     {{ $schedule->room->name }}
                                                 </div>
-                                                <div class="flex items-center">
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                                    </svg>
-                                                    {{ $schedule->lecturer1->user->name }}
-                                                    @if($schedule->lecturer_id_2 && $schedule->lecturer2)
-                                                        , {{ $schedule->lecturer2->user->name }}
-                                                    @endif
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -136,14 +109,14 @@
                         </div>
                     </div>
                 </div>
-            @elseif($student && $student->class_name)
+            @else
                 <div class="modern-card mb-6">
                     <div class="p-6 text-center">
                         <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Tidak Ada Jadwal Hari Ini</h3>
-                        <p class="text-gray-600">Anda tidak memiliki jadwal kuliah untuk hari ini.</p>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Tidak Ada Jadwal Mengajar Hari Ini</h3>
+                        <p class="text-gray-600">Anda tidak memiliki jadwal mengajar untuk hari ini.</p>
                     </div>
                 </div>
             @endif
@@ -153,23 +126,23 @@
                 <div class="p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Menu Cepat</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <a href="{{ route('student.schedule') }}" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                        <a href="{{ route('dosen.schedule') }}" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                             <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                             <div>
                                 <p class="font-semibold text-gray-900">Lihat Jadwal</p>
-                                <p class="text-sm text-gray-600">Jadwal kuliah minggu ini</p>
+                                <p class="text-sm text-gray-600">Jadwal mengajar lengkap</p>
                             </div>
                         </a>
 
-                        <a href="{{ route('student.replacement-schedule') }}" class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                            <svg class="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('dosen.replacement-schedule') }}" class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                            <svg class="w-8 h-8 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                             </svg>
                             <div>
-                                <p class="font-semibold text-gray-900">Jadwal Pengganti</p>
-                                <p class="text-sm text-gray-600">Cek perubahan jadwal</p>
+                                <p class="font-semibold text-gray-900">Pengajuan Jadwal Pengganti</p>
+                                <p class="text-sm text-gray-600">Ajukan perubahan jadwal</p>
                             </div>
                         </a>
                     </div>

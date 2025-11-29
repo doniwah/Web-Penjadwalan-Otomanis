@@ -62,10 +62,10 @@
                             <x-input-label for="prodi" :value="__('Program Studi')" />
                             <select id="prodi" name="prodi" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                 <option value="">Select Prodi</option>
-                                <option value="Teknik Informatika">Teknik Informatika</option>
-                                <option value="Sistem Informasi">Sistem Informasi</option>
-                                <option value="Teknologi Informasi">Teknologi Informasi</option>
-                                <option value="Ilmu Komputer">Ilmu Komputer</option>
+                                <option value="SIPIL">SIPIL</option>
+                                <option value="INDUSTRI">INDUSTRI</option>
+                                <option value="INFORMATIKA">INFORMATIKA</option>
+                                <option value="MESIN">MESIN</option>
                             </select>
                             <x-input-error :messages="$errors->get('prodi')" class="mt-2" />
                         </div>

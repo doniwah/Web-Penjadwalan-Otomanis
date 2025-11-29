@@ -27,6 +27,17 @@
 
                 {{ $slot }}
             </x-sidebar-layout>
+        @elseif(Auth::check() && Auth::user()->role === 'dosen')
+            <!-- Dosen Layout with Sidebar -->
+            <x-dosen-sidebar-layout>
+                <x-slot name="header">
+                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                        @yield('title', 'Dashboard')
+                    </h2>
+                </x-slot>
+
+                {{ $slot }}
+            </x-dosen-sidebar-layout>
         @elseif(Auth::check() && Auth::user()->role === 'mahasiswa')
             <!-- Student Layout with Sidebar -->
             <x-student-sidebar-layout>
@@ -39,7 +50,7 @@
                 {{ $slot }}
             </x-student-sidebar-layout>
         @else
-            <!-- Regular Layout without Sidebar (for Lecturer or Guest) -->
+            <!-- Regular Layout without Sidebar (for Guest) -->
             <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
                 @include('layouts.navigation')
 

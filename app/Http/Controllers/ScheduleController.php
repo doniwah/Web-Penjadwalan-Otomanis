@@ -48,7 +48,8 @@ class ScheduleController extends Controller
         foreach ($bestSchedule as $gene) {
             Schedule::create([
                 'course_id' => $gene['course_id'],
-                'lecturer_id' => $gene['lecturer_id'],
+                'lecturer_id_1' => $gene['lecturer_id_1'],
+                'lecturer_id_2' => $gene['lecturer_id_2'] ?? null,
                 'room_id' => $gene['room_id'],
                 'timeslot_id' => $gene['timeslot_id'],
                 'class_name' => $gene['class_name'],
@@ -71,7 +72,8 @@ class ScheduleController extends Controller
         foreach ($bestSchedule as $gene) {
             Schedule::create([
                 'course_id' => $gene['course_id'],
-                'lecturer_id' => $gene['lecturer_id'],
+                'lecturer_id_1' => $gene['lecturer_id_1'],
+                'lecturer_id_2' => $gene['lecturer_id_2'] ?? null,
                 'room_id' => $gene['room_id'],
                 'timeslot_id' => $gene['timeslot_id'],
                 'class_name' => $gene['class_name'],

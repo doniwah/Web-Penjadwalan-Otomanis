@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Schedule extends Model
 {
-    protected $fillable = ['course_id', 'lecturer_id', 'room_id', 'timeslot_id', 'class_name'];
+    protected $fillable = ['course_id', 'lecturer_id_1', 'lecturer_id_2', 'room_id', 'timeslot_id', 'class_name', 'teaching_assignment_id'];
 
     public function course()
     {
@@ -15,7 +15,17 @@ class Schedule extends Model
 
     public function lecturer()
     {
-        return $this->belongsTo(Lecturer::class);
+        return $this->belongsTo(Lecturer::class, 'lecturer_id_1');
+    }
+
+    public function lecturer1()
+    {
+        return $this->belongsTo(Lecturer::class, 'lecturer_id_1');
+    }
+
+    public function lecturer2()
+    {
+        return $this->belongsTo(Lecturer::class, 'lecturer_id_2');
     }
 
     public function room()
@@ -26,5 +36,10 @@ class Schedule extends Model
     public function timeslot()
     {
         return $this->belongsTo(Timeslot::class);
+    }
+
+    public function teachingAssignment()
+    {
+        return $this->belongsTo(TeachingAssignment::class);
     }
 }

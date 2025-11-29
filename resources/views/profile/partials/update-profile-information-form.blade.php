@@ -47,6 +47,57 @@
             @endif
         </div>
 
+        @if($user->role === 'mahasiswa' && $user->student)
+            <!-- Student-specific fields -->
+            <div class="border-t border-gray-200 pt-6 mt-6">
+                <h3 class="text-md font-medium text-gray-900 mb-4">Data Mahasiswa</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Class Name -->
+                    <div>
+                        <x-input-label for="class_name" :value="__('Kelas')" />
+                        <select id="class_name" name="class_name" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            <option value="">Pilih Kelas</option>
+                            <option value="A" {{ old('class_name', $user->student->class_name) == 'A' ? 'selected' : '' }}>A</option>
+                            <option value="B" {{ old('class_name', $user->student->class_name) == 'B' ? 'selected' : '' }}>B</option>
+                            <option value="C" {{ old('class_name', $user->student->class_name) == 'C' ? 'selected' : '' }}>C</option>
+                            <option value="D" {{ old('class_name', $user->student->class_name) == 'D' ? 'selected' : '' }}>D</option>
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('class_name')" />
+                    </div>
+
+                    <!-- Prodi -->
+                    <div>
+                        <x-input-label for="prodi" :value="__('Program Studi')" />
+                        <select id="prodi" name="prodi" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            <option value="">Pilih Prodi</option>
+                            <option value="Teknik Sipil" {{ old('prodi', $user->student->prodi) == 'Teknik Sipil' ? 'selected' : '' }}>Teknik Sipil</option>
+                            <option value="Teknik Industri" {{ old('prodi', $user->student->prodi) == 'Teknik Industri' ? 'selected' : '' }}>Teknik Industri</option>
+                            <option value="Informatika" {{ old('prodi', $user->student->prodi) == 'Informatika' ? 'selected' : '' }}>Informatika</option>
+                            <option value="Teknik Mesin" {{ old('prodi', $user->student->prodi) == 'Teknik Mesin' ? 'selected' : '' }}>Teknik Mesin</option>
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('prodi')" />
+                    </div>
+
+                    <!-- Semester -->
+                    <div>
+                        <x-input-label for="semester" :value="__('Semester')" />
+                        <select id="semester" name="semester" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            <option value="">Pilih Semester</option>
+                            @for($i = 1; $i <= 8; $i++)
+                                <option value="{{ $i }}" {{ old('semester', $user->student->semester) == $i ? 'selected' : '' }}>Semester {{ $i }}</option>
+                            @endfor
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('semester')" />
+                    </div>
+                </div>
+
+                <p class="text-xs text-gray-500 mt-2">
+                    <strong>Penting:</strong> Data kelas, prodi, dan semester digunakan untuk menampilkan jadwal kuliah Anda.
+                </p>
+            </div>
+        @endif
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

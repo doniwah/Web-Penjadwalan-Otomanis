@@ -19,6 +19,7 @@ class GeneticAlgorithmService
     protected $mutationRate;
     protected $crossoverRate;
     protected $elitismCount;
+    protected $fitnessCache = []; // Cache fitness values
 
     public function __construct($populationSize = 50, $mutationRate = 0.1, $crossoverRate = 0.8, $elitismCount = 2)
     {
@@ -125,6 +126,24 @@ class GeneticAlgorithmService
         $fitness = 1 / (($hardConflicts * 100) + ($softConflicts * 1) + 1);
         return $fitness;
     }
+
+    // Helper method to get fitness with caching
+    protected function getFitness($individual)
+    {
+        $hash = $this->getIndividualHash($individual);
+        
+        if (!isset($this->fitnessCache[$hash])) {
+            $this->fitnessCache[$hash] = $this->calculateFitness($individual);
+        }
+        
+        return $this->fitnessCache[$hash];
+    }
+
+    // Generate a unique hash for an individual
+    protected function getIndividualHash($individual)
+    {
+        return md5(json_encode($individual));
+    }
     
     public function run($generations = 100)
     {
@@ -136,15 +155,15 @@ class GeneticAlgorithmService
         $population = $this->generatePopulation();
 
         for ($g = 0; $g < $generations; $g++) {
-            // Sort by fitness
+            // Sort by fitness (using cached values)
             usort($population, function ($a, $b) {
-                return $this->calculateFitness($b) <=> $this->calculateFitness($a);
+                return $this->getFitness($b) <=> $this->getFitness($a);
             });
 
             // Check for perfect solution (fitness close to 1, meaning 0 hard conflicts)
             // It's hard to get exactly 1 if soft conflicts exist.
             // But we definitely want 0 hard conflicts.
-            $bestFitness = $this->calculateFitness($population[0]);
+            $bestFitness = $this->getFitness($population[0]);
             if ($bestFitness > 0.5) { // Threshold for "good enough" or 0 hard conflicts
                  // If hard conflicts are 0, fitness is 1 / (soft + 1). Max soft is usually low.
                  // If hard conflicts > 0, fitness is < 1/100 = 0.01
@@ -172,9 +191,9 @@ class GeneticAlgorithmService
             $population = $newPopulation;
         }
 
-        // Return best schedule
+        // Return best schedule (using cached values)
         usort($population, function ($a, $b) {
-            return $this->calculateFitness($b) <=> $this->calculateFitness($a);
+            return $this->getFitness($b) <=> $this->getFitness($a);
         });
 
         return $population[0];
@@ -184,14 +203,14 @@ class GeneticAlgorithmService
     {
         $totalFitness = 0;
         foreach ($population as $individual) {
-            $totalFitness += $this->calculateFitness($individual);
+            $totalFitness += $this->getFitness($individual);
         }
 
         $random = rand(0, 1000) / 1000 * $totalFitness;
         $currentFitness = 0;
 
         foreach ($population as $individual) {
-            $currentFitness += $this->calculateFitness($individual);
+            $currentFitness += $this->getFitness($individual);
             if ($currentFitness >= $random) {
                 return $individual;
             }

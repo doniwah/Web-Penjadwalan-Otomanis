@@ -64,6 +64,22 @@ class StudentController extends Controller
         return view('student.schedule', compact('schedules', 'student', 'timeslots', 'days'));
     }
 
+    public function scheduleDetail(Schedule $schedule)
+    {
+        $user = auth()->user();
+        $student = $user->student;
+        
+        // Verify that this schedule belongs to the student's class
+        if (!$student || $schedule->class_name !== $student->class_name) {
+            abort(403, 'Unauthorized access to this schedule.');
+        }
+        
+        // Load all relationships
+        $schedule->load(['course', 'room', 'timeslot', 'lecturer1.user', 'lecturer2.user', 'teachingAssignment']);
+        
+        return view('student.schedule-detail', compact('schedule', 'student'));
+    }
+
     public function replacementSchedule()
     {
         // View replacement schedules

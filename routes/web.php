@@ -24,6 +24,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/generate-schedule', [ScheduleController::class, 'generate']);
     Route::post('/publish-schedule', [ScheduleController::class, 'publish'])->name('schedule.publish');
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
+    Route::get('/schedules/{schedule}', [ScheduleController::class, 'show'])->name('schedules.show');
     
     // Schedule Generation
     Route::get('/schedule/generate', [ScheduleController::class, 'showGenerate'])->name('schedule.generate');
@@ -55,6 +56,7 @@ Route::middleware('auth')->group(function () {
     // Student Routes
     Route::get('/student/dashboard', [StudentController::class, 'index'])->name('student.dashboard');
     Route::get('/student/schedule', [StudentController::class, 'schedule'])->name('student.schedule');
+    Route::get('/student/schedule/{schedule}', [StudentController::class, 'scheduleDetail'])->name('student.schedule.detail');
     Route::get('/student/replacement-schedule', [StudentController::class, 'replacementSchedule'])->name('student.replacement-schedule');
     Route::get('/student/notifications', [StudentController::class, 'notifications'])->name('student.notifications');
 });

@@ -19,7 +19,7 @@
         </div>
 
         <!-- Navigation -->
-        <nav class="mt-6 px-3 overflow-y-auto" style="height: calc(100vh - 180px);">
+        <nav class="mt-6 px-3 overflow-y-auto no-scrollbar" style="height: calc(100vh - 180px);">
             <!-- Dashboard -->
             <a href="{{ route('admin.dashboard') }}" 
                class="flex items-center px-4 py-3 mb-2 rounded-lg transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-blue-700 text-white' : 'text-blue-100 hover:bg-blue-700' }}">

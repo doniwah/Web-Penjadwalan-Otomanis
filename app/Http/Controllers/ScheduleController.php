@@ -42,8 +42,13 @@ class ScheduleController extends Controller
             return redirect()->back()->with('error', 'Failed to generate schedule. Please ensure all data is configured properly.');
         }
 
-        // Save to Database
-        Schedule::truncate(); // Clear old schedule
+        // Save to Database - Delete old schedules safely
+        // First delete replacement schedules that reference schedules
+        \App\Models\ReplacementSchedule::truncate();
+        // Then delete all schedules
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Schedule::truncate();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         foreach ($bestSchedule as $gene) {
             Schedule::create([
@@ -66,8 +71,13 @@ class ScheduleController extends Controller
         // Run GA
         $bestSchedule = $ga->run();
 
-        // Save to Database
-        Schedule::truncate(); // Clear old schedule
+        // Save to Database - Delete old schedules safely
+        // First delete replacement schedules that reference schedules
+        \App\Models\ReplacementSchedule::truncate();
+        // Then delete all schedules
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Schedule::truncate();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         foreach ($bestSchedule as $gene) {
             Schedule::create([
@@ -94,6 +104,14 @@ class ScheduleController extends Controller
         $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
         
         return view('schedules.index', compact('schedules', 'timeslots', 'days'));
+    }
+
+    public function show(Schedule $schedule)
+    {
+        // Load all relationships for detailed view
+        $schedule->load(['course', 'room', 'timeslot', 'lecturer1.user', 'lecturer2.user', 'teachingAssignment']);
+        
+        return view('schedules.show', compact('schedule'));
     }
 
     public function publish()

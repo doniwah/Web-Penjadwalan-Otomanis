@@ -17,21 +17,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Users & Lecturers
-        for ($i = 1; $i <= 5; $i++) {
-            $user = User::create([
-                'name' => "Lecturer $i",
-                'email' => "lecturer$i@example.com",
-                'password' => Hash::make('password'),
-                'role' => 'dosen',
-            ]);
-            Lecturer::create([
-                'user_id' => $user->id,
-                'nip' => "NIP$i",
-                'max_sks' => 12,
-            ]);
-        }
-
+        // Seed users, lecturers, and students first
+        $this->call(UserSeeder::class);
+        
         // Rooms
         Room::create(['name' => 'R101', 'capacity' => 30, 'type' => 'theory']);
         Room::create(['name' => 'R102', 'capacity' => 30, 'type' => 'theory']);
@@ -44,7 +32,7 @@ class DatabaseSeeder extends Seeder
         Course::create(['code' => 'CS202', 'name' => 'Algorithms', 'sks' => 3, 'semester' => 3]);
 
         // Timeslots (Mon-Fri, 08:00-16:00, 2 hour slots)
-        $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
         $times = [
             ['08:00', '10:00'],
             ['10:00', '12:00'],

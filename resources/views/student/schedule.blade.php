@@ -64,25 +64,32 @@
                                                         })->first();
                                                     @endphp
                                                     
+                                                    
                                                     @if($daySchedule)
-                                                        <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded hover:shadow-md transition-shadow">
-                                                            <div class="font-semibold text-gray-900 mb-1">
-                                                                {{ $daySchedule->course->name }}
-                                                            </div>
-                                                            <div class="text-xs text-gray-600 space-y-1">
-                                                                <div>
-                                                                    <i class="fas fa-chalkboard-teacher mr-1"></i>
-                                                                    {{ $daySchedule->lecturer1->user->name ?? '-' }}
-                                                                    @if($daySchedule->lecturer2)
-                                                                        , {{ $daySchedule->lecturer2->user->name }}
-                                                                    @endif
+                                                        <a href="{{ route('student.schedule.detail', $daySchedule->id) }}" class="block">
+                                                            <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded hover:shadow-lg hover:bg-blue-100 transition-all cursor-pointer">
+                                                                <div class="font-semibold text-gray-900 mb-1">
+                                                                    {{ $daySchedule->course->name }}
                                                                 </div>
-                                                                <div>
-                                                                    <i class="fas fa-door-open mr-1"></i>
-                                                                    {{ $daySchedule->room->name }}
+                                                                <div class="text-xs text-gray-600 space-y-1">
+                                                                    <div>
+                                                                        <i class="fas fa-chalkboard-teacher mr-1"></i>
+                                                                        {{ $daySchedule->lecturer1->user->name ?? '-' }}
+                                                                        @if($daySchedule->lecturer2)
+                                                                            , {{ $daySchedule->lecturer2->user->name }}
+                                                                        @endif
+                                                                    </div>
+                                                                    <div>
+                                                                        <i class="fas fa-door-open mr-1"></i>
+                                                                        {{ $daySchedule->room->name }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="mt-2 text-xs text-blue-600 font-medium">
+                                                                    <i class="fas fa-arrow-right mr-1"></i>
+                                                                    Lihat Detail
                                                                 </div>
                                                             </div>
-                                                        </div>
+                                                        </a>
                                                     @else
                                                         <div class="text-gray-400 text-center">-</div>
                                                     @endif
